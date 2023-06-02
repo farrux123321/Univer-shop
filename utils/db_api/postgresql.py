@@ -52,6 +52,30 @@ class Database:
         """
         await self.execute(sql, execute=True)
 
+    async def create_table_category(self):
+        sql = """
+        CREATE TABLE IF NOT EXISTS Category (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(255) NOT NULL UNIQUE,
+        description TEXT NULL
+        );
+        """
+        await self.execute(sql, execute=True)
+
+    async def create_table_product(self):
+        sql = """
+        CREATE TABLE IF NOT EXISTS Product (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(255) NOT NULL UNIQUE,
+        description TEXT NULL,
+        image VARCHAR(255) NOT NULL,
+        price NUMERIC NOT NULL,
+        quantity INTEGER NULL,
+        cat_id INTEGER NOT NULL
+        );
+        """
+        await self.execute(sql, execute=True)
+
     @staticmethod
     def format_args(sql, parameters: dict):
         sql += " AND ".join(
@@ -66,6 +90,20 @@ class Database:
     async def select_all_users(self):
         sql = "SELECT * FROM Users"
         return await self.execute(sql, fetch=True)
+
+    async def select_all_cats(self):
+        sql = "SELECT * FROM Category"
+        return await self.execute(sql, fetch=True)
+
+    async def select_category(self, **kwargs):
+        sql = "SELECT * FROM Category WHERE "
+        sql, parameters = self.format_args(sql, parameters=kwargs)
+        return await self.execute(sql, *parameters, fetchrow=True)
+  
+    async def select_product_by_category(self, **kwargs):
+        sql = "SELECT * FROM Product WHERE "
+        sql, parameters = self.format_args(sql, parameters=kwargs)
+        return await self.execute(sql, *parameters, fetch=True)
 
     async def select_user(self, **kwargs):
         sql = "SELECT * FROM Users WHERE "
